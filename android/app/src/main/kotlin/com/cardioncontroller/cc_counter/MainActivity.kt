@@ -1,4 +1,4 @@
-package com.example.cc_counter
+package com.cardioncontroller.cc_counter
 
 import io.flutter.embedding.android.FlutterActivity
 

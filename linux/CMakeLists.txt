@@ -7,7 +7,8 @@ project(runner LANGUAGES CXX)
 set(BINARY_NAME "cc_counter")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
-set(APPLICATION_ID "com.example.cc_counter")
+set(APPLICATION_ID "com.cardiocontroller.cc_counter")
+add_definitions(-DAPPLICATION_ID="${APPLICATION_ID}")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
