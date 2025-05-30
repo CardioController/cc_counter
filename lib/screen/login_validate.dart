@@ -1,7 +1,7 @@
 import 'package:cc_counter/helper/keys.dart';
 import 'package:cc_counter/helper/pb.dart';
 import 'package:cc_counter/screen/login.dart';
-import 'package:cc_counter/screen/ongoing_sessions.dart';
+import 'package:cc_counter/screen/to_exercise_sessions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
@@ -45,7 +45,7 @@ class _CCLoginValidateState extends State<CCLoginValidate> {
     if (loginSuccess) {
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => CCOnGoingSessions()),
+          MaterialPageRoute(builder: (context) => CCToExerciseSessions()),
           (r) => false,
         );
       }

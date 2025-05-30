@@ -1,5 +1,5 @@
 import 'package:cc_counter/helper/pb.dart';
-import 'package:cc_counter/screen/ongoing_sessions.dart';
+import 'package:cc_counter/screen/to_exercise_sessions.dart';
 import 'package:flutter/material.dart';
 
 class CCLogin extends StatefulWidget {
@@ -38,7 +38,7 @@ class _CCLoginState extends State<CCLogin> {
     if (loginSuccess) {
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => CCOnGoingSessions()),
+          MaterialPageRoute(builder: (context) => CCToExerciseSessions()),
           (r) => false,
         );
       }
@@ -66,78 +66,80 @@ class _CCLoginState extends State<CCLogin> {
       body: Form(
         key: formKey,
         child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(),
-              Column(
-                children: [
-                  ListTile(
-                    title: TextFormField(
-                      controller: pbAddrController,
-                      decoration: InputDecoration(
-                        label: Row(
-                          children: [
-                            Text("Server Address "),
-                            Text("*", style: TextStyle(color: Colors.red)),
-                          ],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(),
+                Column(
+                  children: [
+                    ListTile(
+                      title: TextFormField(
+                        controller: pbAddrController,
+                        decoration: InputDecoration(
+                          label: Row(
+                            children: [
+                              Text("Server Address "),
+                              Text("*", style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                          hintText: "https://cardiocontroller.com",
                         ),
-                        hintText: "https://cardiocontroller.com",
-                      ),
-                      validator: (String? value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter some text';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  ListTile(
-                    title: TextFormField(
-                      controller: emailController,
-                      decoration: InputDecoration(
-                        label: Row(
-                          children: [
-                            Text("Email "),
-                            Text("*", style: TextStyle(color: Colors.red)),
-                          ],
-                        ),
-                        hintText: "musle@cardiocontroller.com",
+                        validator: (String? value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter some text';
+                          }
+                          return null;
+                        },
                       ),
                     ),
-                  ),
-                  ListTile(
-                    title: TextFormField(
-                      controller: passwordController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        label: Row(
-                          children: [
-                            Text("Password "),
-                            Text("*", style: TextStyle(color: Colors.red)),
-                          ],
+                    ListTile(
+                      title: TextFormField(
+                        controller: emailController,
+                        decoration: InputDecoration(
+                          label: Row(
+                            children: [
+                              Text("Email "),
+                              Text("*", style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                          hintText: "musle@cardiocontroller.com",
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              ListTile(
-                title: ElevatedButton(
-                  onPressed: () {
-                    if (formKey.currentState != null &&
-                        formKey.currentState!.validate() &&
-                        !handling) {
-                      handleSubmit();
-                    }
-                  },
-                  child:
-                      handling
-                          ? const CircularProgressIndicator()
-                          : const Text("Submit"),
+                    ListTile(
+                      title: TextFormField(
+                        controller: passwordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          label: Row(
+                            children: [
+                              Text("Password "),
+                              Text("*", style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                ListTile(
+                  title: ElevatedButton(
+                    onPressed: () {
+                      if (formKey.currentState != null &&
+                          formKey.currentState!.validate() &&
+                          !handling) {
+                        handleSubmit();
+                      }
+                    },
+                    child:
+                        handling
+                            ? const CircularProgressIndicator()
+                            : const Text("Submit"),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

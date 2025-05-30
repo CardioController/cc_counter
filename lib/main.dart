@@ -11,11 +11,11 @@ Future<void> main() async {
   final getIt = GetIt.instance;
   getIt.registerSingleton(storage);
 
-  runApp(const CCCounter());
+  runApp(const CCCounterApp());
 }
 
-class CCCounter extends StatelessWidget {
-  const CCCounter({super.key});
+class CCCounterApp extends StatelessWidget {
+  const CCCounterApp({super.key});
 
   @override
   Widget build(BuildContext context) {
