@@ -1,4 +1,4 @@
-import 'package:cc_counter/screen/ongoing_sessions.dart';
+import 'package:cc_counter/screen/to_exercise_sessions.dart';
 import 'package:flutter/material.dart';
 
 class CCFinished extends StatelessWidget {

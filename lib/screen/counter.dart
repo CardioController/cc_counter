@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cc_counter/helper/keys.dart';
 import 'package:cc_counter/screen/finished.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +22,7 @@ class _CCCounterState extends State<CCCounter> {
   late RecordModel currentExercise;
   RecordModel? nextExercise;
   int finishedSets = 0;
+  Timer? durationTimer;
 
   static const counterFontSize = 80.0;
 
@@ -51,7 +54,23 @@ class _CCCounterState extends State<CCCounter> {
     super.dispose();
   }
 
+  // TODO: Add tts function.
+
   void countOne() async {
+    // check if is duration-based
+    if (currentDone == 0 &&
+        (durationTimer == null || !durationTimer!.isActive) &&
+        currentExercise.getStringValue("expand.exercise.type") == "duration") {
+      setState(() {
+        durationTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+          setState(() {
+            countOne();
+          });
+        });
+      });
+      return;
+    }
+
     setState(() {
       currentDone += 1;
     });
@@ -59,9 +78,13 @@ class _CCCounterState extends State<CCCounter> {
     // next exercise
     if (currentExercise.getIntValue("expand.exercise.value") - currentDone ==
         0) {
+      if (durationTimer != null) {
+        durationTimer!.cancel();
+        durationTimer = null;
+      }
       // check if next set
       if (exercises.indexOf(currentExercise) == exercises.length - 1) {
-        // next set
+        // to next set
         setState(() {
           finishedSets += 1;
           currentExercise = exercises.first;
@@ -96,6 +119,42 @@ class _CCCounterState extends State<CCCounter> {
     }
   }
 
+  Widget exerciseCounterDisplay() {
+    late Widget counterText;
+    Widget? hintText;
+    if (currentExercise.getStringValue("expand.exercise.type") ==
+        "repetition") {
+      counterText = Text(
+        "${currentExercise.getIntValue("expand.exercise.value") - currentDone}",
+      );
+    } else {
+      if (durationTimer == null || !durationTimer!.isActive) {
+        hintText = Text("Press To Start");
+      }
+      counterText = Text(
+        Duration(
+          seconds:
+              currentExercise.getIntValue("expand.exercise.value") -
+              currentDone,
+        ).toString().split('.').first,
+      );
+    }
+
+    return DefaultTextStyle(
+      style: TextStyle(color: Colors.white, fontSize: counterFontSize),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("${currentExercise.get("expand.exercise.name")}"),
+            counterText,
+            hintText ?? SizedBox(),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -113,21 +172,7 @@ class _CCCounterState extends State<CCCounter> {
           backgroundColor: Colors.black,
           body: Stack(
             children: [
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "${currentExercise.get("expand.exercise.name")}",
-                      style: TextStyle(fontSize: counterFontSize),
-                    ),
-                    Text(
-                      "${currentExercise.getIntValue("expand.exercise.value") - currentDone}",
-                      style: TextStyle(fontSize: counterFontSize),
-                    ),
-                  ],
-                ),
-              ),
+              exerciseCounterDisplay(),
               Positioned(
                 top: 5.0,
                 left: 5.0,
