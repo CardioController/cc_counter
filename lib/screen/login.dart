@@ -83,7 +83,7 @@ class _CCLoginState extends State<CCLogin> {
                               Text("*", style: TextStyle(color: Colors.red)),
                             ],
                           ),
-                          hintText: "https://cardiocontroller.com",
+                          hintText: "https://frontend.cardio.controller",
                         ),
                         validator: (String? value) {
                           if (value == null || value.isEmpty) {
