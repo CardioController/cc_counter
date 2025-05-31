@@ -4,6 +4,7 @@ import 'package:cc_counter/helper/keys.dart';
 import 'package:cc_counter/screen/finished.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -23,6 +24,7 @@ class _CCCounterState extends State<CCCounter> {
   RecordModel? nextExercise;
   int finishedSets = 0;
   Timer? durationTimer;
+  FlutterTts flutterTts = FlutterTts();
 
   static const counterFontSize = 80.0;
 
@@ -44,6 +46,7 @@ class _CCCounterState extends State<CCCounter> {
     currentExercise = exercises.first;
     nextExercise = exercises[1];
     finishedSets = widget.session.getIntValue("finished_sets");
+    speakExerciseStart();
   }
 
   @override
@@ -54,7 +57,42 @@ class _CCCounterState extends State<CCCounter> {
     super.dispose();
   }
 
-  // TODO: Add tts function.
+  Future speakRemain() async {
+    final remain =
+        currentExercise.getIntValue("expand.exercise.value") - currentDone;
+    if (currentExercise.getStringValue("expand.exercise.type") == "duration") {
+      if (currentDone % 10 == 0) {
+        await flutterTts.speak(
+          "${currentExercise.getStringValue("expand.exercise.name")}, $remain seconds remain",
+        );
+      }
+    } else {
+      await flutterTts.speak("$remain remain");
+    }
+  }
+
+  Future speakExerciseStart({
+    bool speakNext = false,
+    bool speakFinished = false,
+    bool speakSetFinished = false,
+  }) async {
+    var text = currentExercise.getStringValue("expand.exercise.name");
+    if (speakNext) {
+      text = "Next Exercise is $text";
+    }
+    if (speakFinished) {
+      text = "Finished. $text";
+    } else if (speakSetFinished) {
+      text = "Finished and Set Completed. Please rest before next set. $text";
+    }
+    final value = currentExercise.getStringValue("expand.exercise.value");
+    if (currentExercise.getStringValue("expand.exercise.type") == "duration") {
+      text += ", $value seconds, press to start.";
+    } else {
+      text += ", $value moves.";
+    }
+    await flutterTts.speak(text);
+  }
 
   void countOne() async {
     // check if is duration-based
@@ -68,6 +106,7 @@ class _CCCounterState extends State<CCCounter> {
           });
         });
       });
+      flutterTts.speak("Started");
       return;
     }
 
@@ -82,7 +121,8 @@ class _CCCounterState extends State<CCCounter> {
         durationTimer!.cancel();
         durationTimer = null;
       }
-      // check if next set
+
+      // check if to next set
       if (exercises.indexOf(currentExercise) == exercises.length - 1) {
         // to next set
         setState(() {
@@ -98,24 +138,33 @@ class _CCCounterState extends State<CCCounter> {
             .update(widget.session.id, body: {"finished_sets": finishedSets});
 
         // check if exercise finished
-        if (finishedSets == widget.session.get("exercise_sets")) {
+        if (finishedSets == widget.session.get("exercise_sets") && mounted) {
+          speakExerciseStart(speakNext: true, speakFinished: true);
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => CCFinished()),
             (x) => true,
           );
+          return;
         }
-        return;
-      }
 
-      final currentIndex = exercises.indexOf(currentExercise);
-      setState(() {
-        currentExercise = exercises[currentIndex + 1];
-        nextExercise =
-            currentIndex + 2 >= exercises.length
-                ? null
-                : exercises[currentIndex + 2];
-        currentDone = 0;
-      });
+        // TODO: Add start set logic
+        speakExerciseStart(speakNext: true, speakSetFinished: true);
+        // return;
+      } else {
+        // not next set, go to next exercise
+        final currentIndex = exercises.indexOf(currentExercise);
+        setState(() {
+          currentExercise = exercises[currentIndex + 1];
+          nextExercise =
+              currentIndex + 2 >= exercises.length
+                  ? null
+                  : exercises[currentIndex + 2];
+          currentDone = 0;
+        });
+        speakExerciseStart(speakNext: true, speakFinished: true);
+      }
+    } else {
+      speakRemain();
     }
   }
 
@@ -184,7 +233,9 @@ class _CCCounterState extends State<CCCounter> {
                 bottom: 5.0,
                 right: 5.0,
                 child: Text(
-                  "Next Exercise: ${nextExercise == null ? "None" : nextExercise?.get("expand.exercise.name")}",
+                  nextExercise == null
+                      ? "Set completed after this exercise"
+                      : "Next Exercise: ${nextExercise?.get("expand.exercise.name")}",
                 ),
               ),
             ],
